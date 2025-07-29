@@ -1,0 +1,391 @@
+@model List<WeatherZoneApp.Models.City>
+
+@{
+    ViewData["Title"] = "Top 20 Cities";
+}
+
+@section Styles {
+    <style>
+        /* Theme Variables */
+        :root {
+            --card-bg-light: #ffffff;
+            --card-bg-dark: #2c3e50;
+            --card-shadow-light: rgba(0,0,0,0.1);
+            --card-shadow-dark: rgba(0,0,0,0.3);
+        }
+
+        [data-bs-theme="dark"] {
+            --card-bg: var(--card-bg-dark);
+            --card-shadow: var(--card-shadow-dark);
+        }
+
+        [data-bs-theme="light"] {
+            --card-bg: var(--card-bg-light);
+            --card-shadow: var(--card-shadow-light);
+        }
+
+        /* Selection Panel Styles */
+        .selection-panel {
+            background-color: var(--bs-body-bg);
+            height: 100%;
+            min-height: 100vh;
+            border-color: var(--card-border) !important;
+        }
+
+        /* Info Container Styles */
+        .info-container p {
+            margin: 8px 0;
+            display: none;
+        }
+
+        .info-container p.show {
+            display: block;
+        }
+
+        .info-container i {
+            width: 20px;
+            margin-right: 8px;
+            color: var(--bs-primary);
+        }
+
+        /* Card Content Styles */
+        .card-content {
+            min-height: 40%;
+            max-height: 70%;
+            overflow-y: auto;
+            padding: 15px;
+            color: var(--bs-body-color);
+            transition: max-height 0.3s ease;
+        }
+
+        .city-name {
+            color: var(--bs-primary);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        /* Scrollbar Styling */
+        .card-content::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .card-content::-webkit-scrollbar-track {
+            background: var(--bs-body-bg);
+        }
+
+        .card-content::-webkit-scrollbar-thumb {
+            background: var(--bs-primary);
+            border-radius: 5px;
+        }
+
+        /* Card Flip Animation */
+        .city-card {
+            perspective: 1000px;
+            min-height: 300px;
+            position: relative;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .city-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+        }
+
+        .city-card:hover .city-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        /* Card Faces */
+        .city-card-front, .city-card-back {
+            position: relative;
+            width: 100%;
+            min-height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            border: 1px solid var(--card-border);
+            background-color: var(--card-bg);
+            box-shadow: 0 4px 8px var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .city-card-back {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .city-card-front {
+            overflow: hidden;
+        }
+
+        .city-card-back {
+            transform: rotateY(180deg);
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--bs-body-color);
+        }
+
+        /* Image Styles */
+        .card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+
+        /* Content Area */
+        .card-content {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            color: var(--bs-body-color);
+        }
+
+        .info-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        /* Weather Content Styles */
+        .weather-content {
+            text-align: center;
+        }
+
+        .weather-data {
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+            width: 100%;
+        }
+
+        .weather-data h4 {
+            color: var(--bs-primary);
+            margin-bottom: 1rem;
+        }
+
+        .loading {
+            color: var(--bs-primary);
+            font-style: italic;
+        }
+
+        /* General Text Styles */
+        p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .container h1 {
+            color: var(--bs-primary);
+            font-weight: 300;
+            margin-bottom: 2rem;
+        }
+
+        /* Theme Toggle Animation */
+        .theme-toggle {
+            position: relative;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+        }
+
+        [data-bs-theme="light"] .dark-icon,
+        [data-bs-theme="dark"] .light-icon {
+            display: none;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Field toggle functionality
+            const toggles = document.querySelectorAll('.field-toggle');
+            const selectAllBtn = document.getElementById('selectAll');
+            const deselectAllBtn = document.getElementById('deselectAll');
+
+            function updateFields(checkbox) {
+                const field = checkbox.dataset.field;
+                const fields = document.querySelectorAll(`[data-field="${field}"]`);
+                fields.forEach(f => {
+                    if (checkbox.checked) {
+                        f.classList.add('show');
+                    } else {
+                        f.classList.remove('show');
+                    }
+                });
+            }
+
+            toggles.forEach(toggle => {
+                updateFields(toggle); // Initial state
+                toggle.addEventListener('change', () => updateFields(toggle));
+            });
+
+            selectAllBtn.addEventListener('click', () => {
+                toggles.forEach(t => {
+                    t.checked = true;
+                    updateFields(t);
+                });
+            });
+
+            deselectAllBtn.addEventListener('click', () => {
+                toggles.forEach(t => {
+                    t.checked = false;
+                    updateFields(t);
+                });
+            });
+
+            // Weather functionality
+            document.querySelectorAll('.city-card').forEach(card => {
+                card.addEventListener('mouseover', async function() {
+                    const backCard = this.querySelector('.city-card-back');
+                    const cityName = backCard.dataset.city;
+                    const weatherData = backCard.querySelector('.weather-data');
+                    const loading = backCard.querySelector('.loading');
+
+                    if (!weatherData.dataset.loaded) {
+                        try {
+                            const response = await fetch(`/Home/GetWeather?cityName=${encodeURIComponent(cityName)}`);
+                            const data = await response.json();
+
+                            weatherData.querySelector('.temperature').textContent = `Temperature: ${data.temperature}°C`;
+                            weatherData.querySelector('.feels-like').textContent = data.feelsLike ? `Feels like: ${data.feelsLike}°C` : '';
+                            weatherData.querySelector('.description').textContent = `Condition: ${data.description}`;
+                            weatherData.querySelector('.humidity').textContent = `Humidity: ${data.humidity}%`;
+                            weatherData.querySelector('.wind').textContent = `Wind Speed: ${data.windSpeed} m/s`;
+                            weatherData.querySelector('.visibility').textContent = data.visibility ? `Visibility: ${data.visibility}m` : '';
+                            weatherData.querySelector('.sun-times').textContent = 
+                                data.sunrise && data.sunset ? `☀️ ${data.sunrise} - ${data.sunset}` : '';
+
+                            loading.style.display = 'none';
+                            weatherData.style.display = 'block';
+                            weatherData.dataset.loaded = 'true';
+                        } catch (error) {
+                            loading.textContent = 'Error loading weather data';
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Selection Panel -->
+        <div class="col-md-3 col-lg-2 px-3 py-4 border-end selection-panel">
+            <h5 class="mb-3">Display Options</h5>
+            <div class="mb-4">
+                <h6 class="mb-2">General Information</h6>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showCountry" checked data-field="country">
+                    <label class="form-check-label" for="showCountry">Country</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showPopulation" checked data-field="population">
+                    <label class="form-check-label" for="showPopulation">Population</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showRegion" data-field="region">
+                    <label class="form-check-label" for="showRegion">Region</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showArea" data-field="area">
+                    <label class="form-check-label" for="showArea">Area</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showDensity" data-field="density">
+                    <label class="form-check-label" for="showDensity">Population Density</label>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <h6 class="mb-2">Cultural Information</h6>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showLanguage" data-field="language">
+                    <label class="form-check-label" for="showLanguage">Language</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showCurrency" data-field="currency">
+                    <label class="form-check-label" for="showCurrency">Currency</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showLandmarks" data-field="landmarks">
+                    <label class="form-check-label" for="showLandmarks">Famous Landmarks</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showTimeZone" data-field="timezone">
+                    <label class="form-check-label" for="showTimeZone">Time Zone</label>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <h6 class="mb-2">Economic Information</h6>
+                <div class="form-check">
+                    <input class="form-check-input field-toggle" type="checkbox" id="showGdp" data-field="gdp">
+                    <label class="form-check-label" for="showGdp">GDP per Capita</label>
+                </div>
+            </div>
+
+            <button class="btn btn-outline-primary btn-sm" id="selectAll">Select All</button>
+            <button class="btn btn-outline-secondary btn-sm ms-2" id="deselectAll">Deselect All</button>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9 col-lg-10">
+            <h1 class="text-center my-4">Top 20 Cities in the World</h1>
+            <div class="row px-4">
+        @foreach (var city in Model)
+        {
+            <div class="col-sm-6 col-lg-4 col-xl-3">
+                <div class="city-card">
+                    <div class="city-card-inner">
+                        <div class="city-card-front">
+                            <img src="@city.ImageUrl" alt="@city.Name" class="card-img">
+                            <div class="card-content">
+                                <h3 class="city-name">@city.Name</h3>
+                                <div class="info-container">
+                                    <p class="country" data-field="country"><i class="bi bi-globe"></i> @city.Country</p>
+                                    <p class="population" data-field="population"><i class="bi bi-people-fill"></i> @city.Population.ToString("N1") M</p>
+                                    <p class="region" data-field="region"><i class="bi bi-pin-map"></i> @(city.Region ?? "N/A")</p>
+                                    <p class="area" data-field="area"><i class="bi bi-arrows-angle-expand"></i> @(city.AreaKm2?.ToString("N0") ?? "N/A") km²</p>
+                                    <p class="density" data-field="density"><i class="bi bi-graph-up"></i> @(city.PopulationDensity?.ToString("N0") ?? "N/A") /km²</p>
+                                    <p class="language" data-field="language"><i class="bi bi-translate"></i> @(city.Language ?? "N/A")</p>
+                                    <p class="currency" data-field="currency"><i class="bi bi-currency-exchange"></i> @(city.Currency ?? "N/A")</p>
+                                    <p class="landmarks" data-field="landmarks"><i class="bi bi-building"></i> @(city.FamousLandmarks ?? "N/A")</p>
+                                    <p class="timezone" data-field="timezone"><i class="bi bi-clock"></i> @(city.TimeZone ?? "N/A")</p>
+                                    <p class="gdp" data-field="gdp"><i class="bi bi-cash"></i> @(city.GdpPerCapita?.ToString("C0") ?? "N/A")</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="city-card-back" data-city="@city.Name">
+                            <div class="weather-content">
+                                <div class="loading">Loading weather data...</div>
+                                <div class="weather-data" style="display: none;">
+                                    <h4>Weather in @city.Name</h4>
+                                    <p class="temperature"></p>
+                                    <p class="feels-like"></p>
+                                    <p class="description"></p>
+                                    <p class="humidity"></p>
+                                    <p class="wind"></p>
+                                    <p class="visibility"></p>
+                                    <p class="sun-times"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

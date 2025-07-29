@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WeatherZone - Top 20 Cities</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <style>
+        :root[data-bs-theme="dark"] {
+            --bs-body-bg: #1a1d20;
+            --bs-body-color: #e9ecef;
+            --card-bg: #2c3e50;
+            --card-border: #4a5568;
+        }
+
+        :root[data-bs-theme="light"] {
+            --bs-body-bg: #ffffff;
+            --bs-body-color: #212529;
+            --card-bg: #ffffff;
+            --card-border: #dee2e6;
+        }
+
+        .navbar {
+            border-bottom: 1px solid var(--card-border);
+            background-color: var(--bs-body-bg);
+            padding: 1rem 0;
+        }
+
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            gap: 8px;
+            border-color: var(--bs-body-color);
+            color: var(--bs-body-color);
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--bs-body-color);
+            color: var(--bs-body-bg);
+        }
+
+        .theme-toggle i {
+            font-size: 1.2rem;
+        }
+
+        [data-bs-theme="light"] .dark-icon,
+        [data-bs-theme="dark"] .light-icon {
+            display: none;
+        }
+
+        .theme-text {
+            margin-left: 4px;
+        }
+
+        body {
+            background-color: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <span class="navbar-brand fw-bold">WeatherZone</span>
+            <div>
+                <button type="button" class="btn rounded-pill theme-toggle" id="themeToggle">
+                    <i class="bi bi-sun-fill light-icon"></i>
+                    <i class="bi bi-moon-stars-fill dark-icon"></i>
+                    <span class="theme-text">Dark Mode</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const htmlElement = document.documentElement;
+            const themeToggle = document.getElementById('themeToggle');
+            const themeText = themeToggle.querySelector('.theme-text');
+            
+            // Set initial theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            htmlElement.setAttribute('data-bs-theme', savedTheme);
+            updateThemeText(savedTheme);
+
+            // Theme toggle handler
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = htmlElement.getAttribute('data-bs-theme') || 'light';
+                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+                
+                htmlElement.setAttribute('data-bs-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                updateThemeText(newTheme);
+            });
+
+            function updateThemeText(theme) {
+                themeText.textContent = theme === 'light' ? 'Dark Mode' : 'Light Mode';
+            }
+        });
+    </script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
