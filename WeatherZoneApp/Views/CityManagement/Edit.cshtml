@@ -1,0 +1,132 @@
+@model WeatherZoneApp.Models.City
+
+@{
+    ViewData["Title"] = "Edit City";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Edit City: @Model.Name</h2>
+                    <form asp-action="Edit" method="post">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                        <input type="hidden" asp-for="Id" />
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">City Name*</label>
+                            <input asp-for="Name" class="form-control" required />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Country" class="form-label">Country*</label>
+                            <input asp-for="Country" class="form-control" required />
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Population" class="form-label">Population (in millions)*</label>
+                            <input asp-for="Population" type="number" step="0.1" class="form-control" required />
+                            <span asp-validation-for="Population" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ImageUrl" class="form-label">Image URL*</label>
+                            <input asp-for="ImageUrl" type="url" class="form-control" required />
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                            <div class="mt-2">
+                                <img src="@Model.ImageUrl" alt="@Model.Name" class="img-thumbnail" style="max-height: 200px;" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Region" class="form-label">Region</label>
+                            <input asp-for="Region" class="form-control" />
+                            <span asp-validation-for="Region" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="TimeZone" class="form-label">Time Zone</label>
+                            <input asp-for="TimeZone" class="form-control" />
+                            <span asp-validation-for="TimeZone" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Language" class="form-label">Primary Language</label>
+                            <input asp-for="Language" class="form-control" />
+                            <span asp-validation-for="Language" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Currency" class="form-label">Currency</label>
+                            <input asp-for="Currency" class="form-control" />
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AreaKm2" class="form-label">Area (km²)</label>
+                            <input asp-for="AreaKm2" type="number" step="0.01" class="form-control" />
+                            <span asp-validation-for="AreaKm2" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="GdpPerCapita" class="form-label">GDP per Capita</label>
+                            <input asp-for="GdpPerCapita" type="number" step="0.01" class="form-control" />
+                            <span asp-validation-for="GdpPerCapita" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FamousLandmarks" class="form-label">Famous Landmarks</label>
+                            <textarea asp-for="FamousLandmarks" class="form-control" rows="3"></textarea>
+                            <span asp-validation-for="FamousLandmarks" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input asp-for="IsEnabled" class="form-check-input" />
+                                <label asp-for="IsEnabled" class="form-check-label">Enable this city</label>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--card-border);
+        }
+        .form-control {
+            background-color: var(--bs-body-bg);
+            border-color: var(--card-border);
+            color: var(--bs-body-color);
+        }
+        .form-control:focus {
+            background-color: var(--bs-body-bg);
+            border-color: var(--bs-primary);
+            color: var(--bs-body-color);
+        }
+        .form-text {
+            color: var(--bs-secondary);
+        }
+        .img-thumbnail {
+            background-color: var(--card-bg);
+            border-color: var(--card-border);
+        }
+    </style>
+}
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

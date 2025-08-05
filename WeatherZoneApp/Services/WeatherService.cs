@@ -15,21 +15,35 @@ namespace WeatherZoneApp.Services
             _httpClient = httpClient;
         }
 
-        public async Task<WeatherInfo> GetWeatherForCity(string cityName)
+        public async Task<WeatherInfo?> GetWeatherAsync(string cityName, string country)
         {
-            var response = await _httpClient.GetAsync($"http://api.openweathermap.org/data/2.5/weather?q={cityName}&appid={_apiKey}&units=metric");
+            var response = await _httpClient.GetAsync($"http://api.openweathermap.org/data/2.5/weather?q={cityName},{country}&appid={_apiKey}&units=metric");
             
             if (response.IsSuccessStatusCode)
             {
                 var content = await response.Content.ReadAsStringAsync();
                 var json = JObject.Parse(content);
 
+                var mainData = json["main"];
+                var weatherData = json["weather"]?.FirstOrDefault();
+                var sysData = json["sys"];
+
                 return new WeatherInfo
                 {
-                    Temperature = json["main"]["temp"].Value<double>(),
-                    Description = json["weather"][0]["description"].Value<string>(),
-                    Humidity = json["main"]["humidity"].Value<int>(),
-                    WindSpeed = json["wind"]["speed"].Value<double>()
+                    Temperature = mainData?["temp"]?.Value<double>() ?? 0,
+                    Description = weatherData?["description"]?.Value<string>() ?? "No description available",
+                    Humidity = mainData?["humidity"]?.Value<int>() ?? 0,
+                    WindSpeed = json["wind"]?["speed"]?.Value<double>() ?? 0,
+                    FeelsLike = mainData?["feels_like"]?.Value<double>(),
+                    Visibility = json["visibility"]?.Value<int>(),
+                    Sunrise = sysData?["sunrise"]?.Value<long>() is long sunriseTime
+                        ? DateTimeOffset.FromUnixTimeSeconds(sunriseTime)
+                            .LocalDateTime.ToString("HH:mm")
+                        : null,
+                    Sunset = sysData?["sunset"]?.Value<long>() is long sunsetTime
+                        ? DateTimeOffset.FromUnixTimeSeconds(sunsetTime)
+                            .LocalDateTime.ToString("HH:mm")
+                        : null
                 };
             }
 

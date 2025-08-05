@@ -250,12 +250,13 @@
                 card.addEventListener('mouseover', async function() {
                     const backCard = this.querySelector('.city-card-back');
                     const cityName = backCard.dataset.city;
+                    const country = backCard.dataset.country;
                     const weatherData = backCard.querySelector('.weather-data');
                     const loading = backCard.querySelector('.loading');
 
                     if (!weatherData.dataset.loaded) {
                         try {
-                            const response = await fetch(`/Home/GetWeather?cityName=${encodeURIComponent(cityName)}`);
+                            const response = await fetch(`/Home/GetWeather?cityName=${encodeURIComponent(cityName)}&country=${encodeURIComponent(country)}`);
                             const data = await response.json();
 
                             weatherData.querySelector('.temperature').textContent = `Temperature: ${data.temperature}°C`;
@@ -368,7 +369,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="city-card-back" data-city="@city.Name">
+                        <div class="city-card-back" data-city="@city.Name" data-country="@city.Country">
                             <div class="weather-content">
                                 <div class="loading">Loading weather data...</div>
                                 <div class="weather-data" style="display: none;">

@@ -1,0 +1,71 @@
+@model WeatherZoneApp.Models.City
+
+@{
+    ViewData["Title"] = "Add City";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title mb-4">Add New City</h2>
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger" role="alert">
+                            @TempData["Error"]
+                        </div>
+                    }
+                    <form asp-action="Create" method="post" id="create-form">
+                        <div asp-validation-summary="All" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">City Name*</label>
+                            <input asp-for="Name" class="form-control" required />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                            <small class="form-text text-muted">Enter the official city name</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Country" class="form-label">Country*</label>
+                            <input asp-for="Country" class="form-control" required />
+                            <span asp-validation-for="Country" class="text-danger"></span>
+                            <small class="form-text text-muted">Enter the full country name (e.g., "United States" not "USA")</small>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index" class="btn btn-outline-secondary">Back to List</a>
+                            <button type="submit" class="btn btn-primary">Create City</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .card {
+            background-color: var(--card-bg);
+            border-color: var(--card-border);
+        }
+        .form-control {
+            background-color: var(--bs-body-bg);
+            border-color: var(--card-border);
+            color: var(--bs-body-color);
+        }
+        .form-control:focus {
+            background-color: var(--bs-body-bg);
+            border-color: var(--bs-primary);
+            color: var(--bs-body-color);
+        }
+        .form-text {
+            color: var(--bs-secondary);
+        }
+    </style>
+}
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}
